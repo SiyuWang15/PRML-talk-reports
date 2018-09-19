@@ -1,0 +1,188 @@
+\PassOptionsToPackage{english}{babel}
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+% \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading nips_2018
+
+% ready for submission
+%\usepackage{nips_2018}
+
+% to compile a preprint version, e.g., for submission to arXiv, add
+% add the [preprint] option:
+% \usepackage[preprint]{nips_2018}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+\usepackage[final]{nips_2018}
+
+% to avoid loading the natbib package, add option nonatbib:
+% \usepackage[nonatbib]{nips_2018}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\newcommand{\norm}{\mathcal N}
+\newcommand{\mbf}{\mathbf}
+\newcommand{\mrm}{\mathrm}
+
+\title{Reports on PRML Reading Talk}
+
+% The \author macro works with any number of authors. There are two
+% commands used to separate the names and addresses of multiple
+% authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to
+% break the lines. Using \AND forces a line break at that point. So,
+% if LaTeX puts 3 of 4 authors names on the first line, and the last
+% on the second line, try using \AND instead of \And before the third
+% author name.
+
+\author{
+  Siyu Wang\\
+  Department of Computer Science\\
+  Tsinghua University\\
+  \texttt{thuwangsy@gmail.com} \\
+  %% examples of more authors
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \AND
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+}
+
+\begin{document}
+% \nipsfinalcopy is no longer used
+
+\maketitle
+
+\section{Introduction to ML, probability basics--prml chap.1,2, mlapp chap.1,2}
+The key purpose of machine learning is to extract good \textbf{features} and \textbf{patterns} from \textbf{data}. To realize this purpose, we mainly use function fitting as the tool to solve this problem. In this section we will focus on a polynomial fitting problem, solving it from different angles and considering differences and relations among them. 
+
+But we must keep in mind that, function fitting is only a mathematical tool, not our purpose.
+
+Consider the following problem: given some observed points:
+\begin{center}
+$D=\{(x_1,t_1),(x_2,t_2), \cdots, (x_N,x_N)\}$
+\end{center}
+in which, $t = \sin(2\pi x)+\norm(0, \sigma^2)$. Then we want to find a polynomial function
+\begin{equation}\label{eq1.1}
+    t = y(x,\bf{w})= w_0+w_1x+w_2x^2+...+x_M x^M \tag{1.1}
+\end{equation}
+to fit these points, so when given new values of $x$, we can predict the corresponding $t$.
+
+\subsection*{From function fitting angle}
+We want to optimize the unknown parameter $\mrm{w}$ in equation.\ref{eq1.1} by minimize the \emph{error function}
+\begin{equation}\label{eq1.2}
+    E(\mrm w) = \frac12\sum_{n=1}^N\{y(x_n, \mrm w)-t_n\}^2.\tag{1.2}
+\end{equation}
+So we can set the error function's derivative with respect to $\textbf{w}$ to zero and easily get the optimal parameter $\mbf{w}^*$. 
+
+To reduce the over-fitting problem, we may make a little change about the error function by adding a regularization item:
+\begin{equation}\label{eq1.3}
+    E(\mrm w) = \frac12\sum_{n=1}^N\{y(x_n, \mrm w)-t_n\}^2 + \frac{\lambda}{2}\|\mrm w\|^2. \tag{1.3}
+\end{equation}
+
+\subsection*{From probabilistic angle}
+Here, we shall assume that, given the value of $x$, the corresponding value of $t$ has a Gaussian distribution with a mean equal to the value $y(x,\mrm{w})$ and a fixed variance $\beta$. So we have 
+\begin{equation}
+    p(t|x, \mrm w, \beta) = \norm(y(x, \mrm w), \beta^{-1}) \tag{1.4}
+\end{equation}
+
+\subsubsection*{MLE: maximum likelihood estimation}
+Given $N$ input value $\mbf{x} = (x_1,\cdots, x_N)^T$ and their corresponding target value $\mbf t= (t_1, \cdots, t_N)^T$, we have the likelihood function with the form as 
+\begin{equation}
+    p(\mbf t|\mbf x, \mrm w, \beta) = \prod_{n=1}^N\norm(t_n|y(x_n,\mrm w),\beta^{-1}). \tag{1.5}
+\end{equation}
+It's convenient to maximize the logarithm of the likelihood function
+\begin{equation}
+    \ln p(\mbf t|\mbf x, \mrm w, \beta) = -\frac{\beta}{2}\sum_{n=1}^N\{y(x_n,\mrm w)-t_n\}^2+\frac N2\ln\beta-\frac N2\ln(2\pi). \tag{1.6}
+\end{equation}
+So when determining $\mbf w$, maximizing likelihood function is equal to minimizing the error function in equation.\ref{eq1.2}. And we obtain
+\begin{gather}
+    \frac1{\beta_{ML}} = \frac1N\sum_{n=1}^N\{y(x_n,\mrm w_{ML})-t_n\}^2. \tag{1.7}
+\end{gather}
+So we get a probability distribution of $t$ when given a new value of $x$
+\begin{equation}
+    p(t|x,\mrm w_{ML},\beta_{ML}) = \norm(t|y(x,\mrm w_{ML},\beta_{ML}) \tag{1.8}
+\end{equation}
+
+\subsubsection*{MAP: maximum a posteriori estimation}
+Now we take a step towards a more Bayesian approach and introduce a prior distribution over the polynomial coefficient $\mrm w$ and for simplicity, consider a Gaussian distribution of the form 
+\begin{equation}
+    p(\mrm w|\alpha) = \norm(\mrm w|0,\alpha^{-1}\mrm I) = (\frac\alpha{2\pi})^{(M+1)/2}\exp\{-\frac\alpha2\|w\|^2\} \tag{1.9}
+\end{equation}
+where $\alpha$ is the precision of the distribution and $M+1$ is the total number of elements in the vector $\mbf w$. Using Bayes' theorem, we can get the posterior distribution for $\mbf w$, which is proportional to the product of the prior distribution and the likelihood function 
+\begin{equation}
+    p(\mrm w| \mbf x, \mbf t,\alpha, \beta) \propto p(\mbf t|\mrm w, \mbf x, \beta)p(\mrm w|\alpha).  \tag{1.10}
+\end{equation}
+And finally we find that the maximum of the posterior is given by the minimum of 
+\begin{equation}
+    \frac\beta2\sum_{n=1}^N\{y(x_n,\mrm w) -t_n\}^2+\frac\alpha2\mrm w^T\mrm w. \tag{1.11}
+\end{equation}
+Thus we see that maximizing the posterior distribution is equivalent to minimizing the regularized sum-of-square error function in the form (\ref{eq1.3})
+
+\subsection*{Inference and decision}
+Here, we come to a classification problem and we have three different approaches to doing inference and decision.
+\begin{enumerate}
+    \item First solve $p(\mrm{x}|\mathcal C_k)$ as well as $p(\mathcal C_k$ for each class individually, then figure out $p(\mathcal C_k|\mrm x) = \frac{p(\mathrm x|\mathcal C_k)p(\mathcal C_k)}{p(\mrm x)}$ and $p(\mrm x)$ can be gotten from $p(\mrm x) = \sum_kp(\mrm x|\mathcal C_k)p(\mathcal C_k)$. This is equivalent to model the joint distribution $p(\mrm x, \mathcal C_k)$
+  \item Determine posterior class probabilities $p(\mathcal C_k|\mrm x)$  and then use decision theory.  \emph{discriminative model}.
+  \item Find $f(\mathrm x)$ which maps $\mrm{x}$ directly to a class label.
+\end{enumerate}
+The first approach is too time-consuming and demanding, while the last one is simplest but not so robust as approach.2 because we can see a lot of information from the posterior probabilities.
+
+\subsection*{For others}
+Other than the main ideas and problems discussed above, there are still some other small items here:\emph{Gaussian probability distribution, exponential family, students' t distribution, conjugate prior, } and so on. For more details about these, we can refer to the original book. 
+
+\section{Statistics, information theory basics--mlapp chap.5,6}
+
+\section{Linear models(1)--mlapp chap.7, prml chap.3}
+
+\section{Linear models(2)--mlapp chap.8, prml chap.4}
+
+\section{Kernels--mlapp chap.14. prml chap.6-7}
+
+\section{Graphical models--mlapp chap 10, 19. prml chap 8.1-8.3}
+
+\section{Latent variable model, clustering and EM. prml chap9. mlapp chap11, 25}
+
+\section{Continuous latent variables. prml chap 12. mlapp 12-13}
+
+\section{Exact inference--mlapp chap20. prml chap 8.4}
+
+\section{Variational inference--prml chap10. mlapp chap21-22}
+
+\section{Monte Carlo-- prml11. mlapp 23,24}
+
+\section{Sequential data--prml chap13. mlapp chap 17-18.}
+
+\section{Gaussian Process--mlapp chap15}
+
+\section{Neural network--mlapp chap 16. prml chap5.}
+
+\section{Deep learning--mlapp chap 28.}
+
+\section{Combining models. prml chap 14}
+\end{document}
