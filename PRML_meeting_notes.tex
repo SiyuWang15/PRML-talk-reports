@@ -32,6 +32,7 @@
 \newcommand{\norm}{\mathcal N}
 \newcommand{\mbf}{\mathbf}
 \newcommand{\mrm}{\mathrm}
+\newcommand{\mcal}{\mathcal}
 
 \title{Reports on PRML Reading Talk}
 
@@ -204,9 +205,73 @@ In this part, we see inference from another angle, avoiding treating parameters 
 
 Given a distribution $p(x|\theta^*)$ where $\theta$ is fixed and we have data $D=(x_1, x_2, \dots, x_n)$ where $x_i\sim p(x|\theta^*)$ and are i.i.d. We want to obtain an estimator $\hat{\theta}=\delta(D)$, which is a function of data to estimate the true parameters $\theta$. 
 
-\section{Linear models(1)--mlapp chap.7, prml chap.3}
+\section{Linear models(1)}
+\emph{MLAPP Chap.7; PRML Chap.3}
 
-\section{Linear models(2)--mlapp chap.8, prml chap.4}
+In this section, we mainly want to solve the regression problem using a linear model from MLE angle and MAP angle. 
+\textbf{Problem setting:} Consider outputs is a linear combination of the inputs 
+\begin{equation}
+    y(\mbf x) = \mbf w^T\mbf x+\epsilon = \sum_{j=1}^{d}w_jx_j+\epsilon.
+\end{equation}
+And we can rewrite the model in a probabilistic form:
+\begin{equation}
+    p(y|\mbf x, \theta) = \norm(y|\mu(\mbf x),\sigma^2(\mbf x)) = \norm(y|\mbf w^T\mbf x, \sigma^2(\mbf x))
+\end{equation}
+To extend this model linear model, we introduce basis functions, and now the model is 
+\begin{equation}
+    p(y|\mbf x,\theta) = \norm(y|\mbf w^T\phi(\mbf x),\sigma^2(\mbf x))
+\end{equation}
+where $\phi$ is a set of functions and $\phi(\mbf x) = (\phi_1(\mbf x), \dots, \phi_M\mbf x)$. And in most cases we assume that $\sigma^2(\mbf x) = \sigma^2$
+\subsection*{Maximum Likelihood Estimator}
+In this view, we want to find a set of parameters $\theta$ so that likelihood is maximized:
+\begin{equation}
+    \hat{\theta}=\arg\max_{\theta}\log p(\mathcal D|\theta). 
+\end{equation}
+And we usually consider the inputs and outputs are i.i.d, so we can obtain
+\begin{equation}
+    L(\theta) = \log p(\mcal D|\theta)=\log p(\mbf y|\mbf x, \theta) =\sum_{i=1}^{D}\log p(y_i|\mbf x_i,\theta).
+\end{equation}
+Then we replace $p(y_i|\mbf x_i, \theta)$ by Gaussian distribution, set the derivative with respect to $\mbf w$ to zero and we can obtain
+\begin{equation}
+    \hat{\mbf w}_{\mrm{MLE}} = (\mbf X^T\mbf X)^{-1}\mbf X^T\mbf y.
+\end{equation}
+Ans we can understand this method from geometry view. 
+
+There is usually a serious over-fitting problem in MLE so we introduce a regularization item in the object function:
+\begin{equation}
+    J(\mbf w) = \frac{1}{N}\sum_{i=1}^{N}(y_i-\mbf w^T \mbf x_i)^2+\lambda\|\mbf w\|^2,
+\end{equation}
+and 
+\begin{equation}
+    \hat{\mbf w}_{\mrm{ridge}} = (\lambda \mrm I_d +\mbf X^T\mbf X)^{-1}\mbf X^T\mbf y.
+\end{equation}
+
+\subsection*{Maximum A Posterior -- Bayesian Linear Regression}
+Using Bayes' theorem, we obtain
+\begin{equation}
+    p(\theta|\mcal D) = \frac{p(\mcal D|\theta)p(\theta)}{p(\mcal D)} \propto p(\mcal D|\theta)p(\theta)
+\end{equation}
+The conjugate prior corresponding to Gaussian likelihood is still Gaussian, so we assume the prior of $\mbf w$ has a Gaussian form:
+\begin{equation}
+    p(\mbf w) = \norm (\mbf w|\mbf w_0,\mbf V_0).
+\end{equation}
+So 
+\begin{equation}
+    p(\mbf w|\mbf X,\mbf y, \sigma^2)\propto \norm(\mbf w|\mbf w_0,\mbf V_0)\norm(\mbf y|\mbf X,\mbf w,\sigma^2\mbf I_N) = \norm(\mbf w|\mbf w_N,\mbf V_N)
+\end{equation}
+And if we choose $\mbf V_0=\alpha^{-1}\mbf I$ and $\alpha\rightarrow 0$, we will see $\hat{\mbf w}_{\mrm{MLE}} = \mbf w_N$
+
+\subsubsection*{Bayesian Model Selection}
+\begin{equation}
+    \mrm{Bayesian factor}:=\frac{p(\mcal D|\mcal M_i)}{p(\mcal D|\mcal M_j)}
+\end{equation}
+A model $\mcal M_i$ is controlled by a set of parameters $\mbf w$, and 
+\begin{equation}
+    p(\mcal D|\mcal M_i) = \int p(\mcal D|\mbf w,\mcal M_i)p(\mbf w|\mcal M_i)\mrm d\mbf w.
+\end{equation}
+
+\section{Linear models(2)}
+\emph{MLAPP Chap.8; PRML Chap.4}
 
 \section{Kernels--mlapp chap.14. prml chap.6-7}
 
