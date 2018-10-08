@@ -78,7 +78,9 @@
 
 \maketitle
 
-\section{Introduction to ML, probability basics--prml chap.1,2, mlapp chap.1,2}
+\section{Introduction to ML, Probability Basics}
+\emph{PRML chap.1,2; MLAPP chap.1,2}
+
 The key purpose of machine learning is to extract good \textbf{features} and \textbf{patterns} from \textbf{data}. To realize this purpose, we mainly use function fitting as the tool to solve this problem. In this section we will focus on a polynomial fitting problem, solving it from different angles and considering differences and relations among them. 
 
 But we must keep in mind that, function fitting is only a mathematical tool, not our purpose.
@@ -154,9 +156,53 @@ Here, we come to a classification problem and we have three different approaches
 The first approach is too time-consuming and demanding, while the last one is simplest but not so robust as approach.2 because we can see a lot of information from the posterior probabilities.
 
 \subsection*{For others}
-Other than the main ideas and problems discussed above, there are still some other small items here:\emph{Gaussian probability distribution, exponential family, students' t distribution, conjugate prior, } and so on. For more details about these, we can refer to the original book. 
+Other than the main ideas and problems discussed above, there are still some other small items here: \emph{Gaussian probability distribution, exponential family, students' t distribution, conjugate prior, } and so on. For more details about these, we can refer to the original book. 
 
-\section{Statistics, information theory basics--mlapp chap.5,6}
+\section{Statistics, Information Theory Basics}
+\emph{MLAPP Chap.5,6}
+\subsection*{Bayesian Statistics}
+Bayes' theorem: 
+\begin{equation}
+    p(\theta|D)=\frac{p(D|\theta)p(\theta)}{p(D)}
+\end{equation}
+Priors are assumptions about values of parameters and we can choose an appropriate prior from many different types: \emph{conjugate prior, uninformative prior, robust prior, Jeffreys prior}. 
+\subsubsection*{Jeffreys prior}
+Given a fixed likelihood $p(\mrm x|\phi)$ where $\mrm x$ represents the data, $\phi$ represents parameters. Then we define Fisher information as the form:
+\begin{equation}
+    I_{\phi}(\phi)=-\mrm E_{\mrm X\sim p(\mrm x|\phi)}[(\frac{\mrm d\log p(\mrm X|\phi)}{\mrm d\phi})^2]
+\end{equation}
+and Jeffreys prior is 
+\begin{equation}
+    p(\phi)\propto(I_{\phi}(\phi))^{1/2}
+\end{equation}
+An important property of Jeffreys prior is that if we assume $\theta=h(\phi)$, then the prior of $\theta$ is also Jeffreys prior:
+\begin{equation}
+    p(\theta)\propto (I_{\theta}(\theta))^{1/2}
+\end{equation}
+
+And we need to notice that the mixtures of conjugate priors is still a conjugate prior.
+
+\subsubsection*{Hierarchical Bayes}
+We can change a 1-level model with the form as:
+\begin{equation}
+    \theta \rightarrow D
+\end{equation}
+into a 2-level one by adding a parameter over the prior of $\theta$, then we have
+\begin{equation}
+    \eta\rightarrow\theta\rightarrow D
+\end{equation}
+If we apply maximum likelihood respectively to these two models, we can obtain
+\begin{gather}
+    \mrm{1-level model: }\theta^*=\arg\max_{\theta}p(D|\theta) \\
+    \mrm{2-level model: }\eta^*=\arg\max_\eta p(D|\eta)=\arg\max_{\eta}[\int p(D|\theta)p(\theta|\eta)\mrm d\theta]
+\end{gather}.
+The maximum likelihood for 2-level model is also called \textbf{Empirical Bayes}.
+\subsubsection*{Bayesian decision theory}
+
+\subsection*{Frequentist Statistics}
+In this part, we see inference from another angle, avoiding treating parameters like random variables, avoiding the use of priors and starting from sampling distribution. 
+
+Given a distribution $p(x|\theta^*)$ where $\theta$ is fixed and we have data $D=(x_1, x_2, \dots, x_n)$ where $x_i\sim p(x|\theta^*)$ and are i.i.d. We want to obtain an estimator $\hat{\theta}=\delta(D)$, which is a function of data to estimate the true parameters $\theta$. 
 
 \section{Linear models(1)--mlapp chap.7, prml chap.3}
 
@@ -164,19 +210,19 @@ Other than the main ideas and problems discussed above, there are still some oth
 
 \section{Kernels--mlapp chap.14. prml chap.6-7}
 
-\section{Graphical models--mlapp chap 10, 19. prml chap 8.1-8.3}
+\section{Graphical models--mlapp chap.10, 19. prml chap 8.1-8.3}
 
-\section{Latent variable model, clustering and EM. prml chap9. mlapp chap11, 25}
+\section{Latent variable model, clustering and EM. prml chap.9 mlapp chap.11, 25}
 
-\section{Continuous latent variables. prml chap 12. mlapp 12-13}
+\section{Continuous latent variables. prml chap 12. mlapp.12,13}
 
-\section{Exact inference--mlapp chap20. prml chap 8.4}
+\section{Exact inference--mlapp chap.20. prml chap 8.4}
 
-\section{Variational inference--prml chap10. mlapp chap21-22}
+\section{Variational inference--prml chap10. mlapp chap.21,22}
 
-\section{Monte Carlo-- prml11. mlapp 23,24}
+\section{Monte Carlo-- prml chap.11. mlapp chap.23,24}
 
-\section{Sequential data--prml chap13. mlapp chap 17-18.}
+\section{Sequential data--prml chap.13. mlapp chap.17-18.}
 
 \section{Gaussian Process--mlapp chap15}
 
