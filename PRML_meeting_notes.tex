@@ -272,8 +272,37 @@ A model $\mcal M_i$ is controlled by a set of parameters $\mbf w$, and
 
 \section{Linear models(2)}
 \emph{MLAPP Chap.8; PRML Chap.4}
+\subsubsection*{Logistic Regression}
+Using Bayes Theorem we have 
+\begin{equation}
+    p(C_1|\mrm x) = \frac{p(\mrm x|C_1)p(C_1)}{p(\mrm x)} = \frac{p(\mrm x|C_1)p(C_1)}{p(\mrm x|C_1)p(C_1)+p(\mrm x|C_2)p(C_2)}=\sigma(a)
+\end{equation}
+where $a =\log\frac{p(\mrm x|C_2)p(C_2)}{p(\mrm x|C_1)p(C_1)}$.
 
-\section{Kernels--mlapp chap.14. prml chap.6-7}
+Suppose $p(\mrm x|C_k)$ is  Gaussian, then we can obtain $a = \mrm w^T\mrm x+\mrm w_0$ and this is very simple to compute $p(C_1|\mrm x)$.
+
+\textbf{Maximum Conditional Likelihood Estimator}.\newline
+\begin{equation}
+    \hat{\mrm w} = \arg\max_{\mrm x}\prod_{i=1}^{N}p(y_i|\mrm x_i,\mrm w).
+\end{equation}
+Take the logarithm form to be likelihood function and we have 
+\begin{equation}
+    L(\mrm w) = -\log\prod_{i=1}^{N}p(y_i|\mrm x_i,\mrm w)=-\sum_{i=1}^{N}\log(p(y_i|\mrm x_i,\mrm w))
+\end{equation}
+Which is not solvable analytically, so we have no closed-form solution and we need some descent algorithms to minimize $L(\mrm w)$.
+\textbf{Gradient descent}
+In each iteration, we update the parameter by taking a step backwards the direction which the gradient points to
+\begin{equation}
+    \mrm w^{(\tau+1)} = \mrm w^{\tau}-\eta \nabla_{\mrm w}L(\mrm w)
+\end{equation}
+
+\subsubsection*{Bayesian Logistic Regression}
+Estimate the posterior of parameters $\mrm w$ rather than just a point estimation.
+
+\textbf{Generative model}: learn a model of the \textbf{joint probability}, $p(x, y)$, of the inputs $x$ and the label $y$, and make their predictions by using Bayes rules to calculate $p(ylx)$, and then picking the most likely label $y$.\newline
+\textbf{Discriminative model}: learn the posterior $p(ylx)$ directly, or learn a direct map from inputs $x$ to the class labels.
+\section{Kernels}
+\emph{MLAPP Chap.14; PRML Chap.6,7}
 
 \section{Graphical models--mlapp chap.10, 19. prml chap 8.1-8.3}
 
