@@ -70,6 +70,7 @@
 \newcommand{\CC}{\mbf C}
 
 
+\newcommand{\kk}{\mbf k}
 \newcommand{\ww}{\mbf w}
 \newcommand{\mm}{\mbf m}
 \newcommand{\ttt}{\mbf t}
@@ -81,6 +82,7 @@
 \newcommand{\zz}{\mbf z}
 \newcommand{\bmu}{\bm{\mu}}
 \newcommand{\bphi}{\bm{\phi}}
+\newcommand{\bmz}{\bm{0}}
 
 \newcommand{\Exp}{\mathbb{E}}
 \newcommand{\rev}{^{-1}}
@@ -571,6 +573,70 @@ message on any of its other links since the last time it send a message to b.
 \section{Variational Inference}
 \emph{MLAPP Chap.21,22; PRML Chap.10}
 
+So far we have several inferences: 
+\begin{itemize}
+    \item Compute the likelihood of observed data.
+    \item Compute the marginal distribution.
+    \item Compute the conditional probability.
+\end{itemize}
+And we have several methods to do exact inference:
+\begin{itemize}
+    \item Brute force
+    \item Elimination
+    \item Message passing
+\end{itemize}
+Also there are several approximation inference techniques such as sampling method, MCMC and variational algorithms.
+
+In variational inference, we want to approximate the target distribution $p$ by a 'simpler' distribution $q$, and we will turn the inference problem into a constrained optimization problem. Then we introduce KL-divergence as our optimization objective. 
+
+\subsection{KL divergence}
+Suppose we have a set of observed variables $\xx$ and latent variables $\zz$. We want to infer 
+\begin{equation}
+    p(\zz|\xx) = \frac{p(\xx,\zz)}{p(\xx)}.
+\end{equation}
+When it's hard to compute $p(\zz|\xx)$, we may find an approximation $q(\zz)$. And KL divergence between these two distributions are defined as follow:
+\begin{equation}
+    \mrm{KL}(q(\zz)||p(\zz)) = \int_{\zz}q(\zz)\log \frac{q(\zz)}{p(\zz)}\mrm d\zz = \Exp_{q(\zz)}[\log \frac{q(\zz)}{p(\zz)}].
+\end{equation}
+So our goal is to find a distribution $q(\zz)$ to minimize the KL divergence:
+\begin{equation}\label{eq10.1}
+    q^*(\zz) = \arg\max_{q(\zz)\in \mcal Q}\mrm{KL}(q(\zz)||p(\zz|\xx)).
+\end{equation}
+This objective is however intractable :
+\begin{align}
+    \mrm{KL}(q(\zz)||p(\zz|\xx)) & = \int q(\zz)\log\frac{q(\zz)}{p(\zz|\xx)}\mrm d\zz \\
+    & =\Exp_{q(\zz)}[\log q(\zz)]-\Exp_{q(\zz)}[\log p(\zz,\xx)]+\log p(\xx) \\
+    & = -\mathbb H(q)- \Exp_{q(\zz)}[\log p(\zz,\xx)] +\log p(\xx).
+\end{align}
+
+\subsection{Evidence Lower Bound}
+We define 
+\begin{equation}
+    \mrm{ELBO}(q) = -\mrm{KL}(q(\zz)||p(\zz|\xx)) +\log p(\xx) =  \mathbb H(q) + \Exp_{q(\zz)}[\log p(\zz,\xx)].
+\end{equation}
+Then the minimization problem formulated in \ref{eq10.1} can be transformed into 
+\begin{equation}
+    q^*(\zz) = \arg\max_{q(\zz)}\mrm{ELBO}(q).
+\end{equation}
+And we notice that when the KL divergence is 0, $\mrm{ELBO}(q)$ is maximized. 
+
+Also we can obtain another view of ELBO by dissecting the variational objective. We can show that it mirrors the usual balance between likelihood and the prior:
+\begin{align}
+    \mrm{ELBO} (q) & = \Exp_{q(\zz)}[\log p(\zz,\xx)]-\Exp_{q(\zz)}[\log q(\zz)] \\
+     & = \Exp_{q(\zz)}[\log p(\zz)] + \Exp_{q(\zz)}[\log p(\xx|\zz)]-\Exp_{q(\zz)}[\log q(\zz)] \\
+     & = \Exp_{q(\zz)}[\log p(\xx|\zz)] + \Exp_{q(\zz)}[\log \frac{p(\zz)}{q(\zz)}] \\
+     & = \Exp_{q(\zz)}[\log p(\xx|\zz)] - \mrm{KL}(q(\zz)||p(\zz))
+\end{align}
+where $\Exp_{q(\zz)}[\log p(\xx|\zz)]$ denotes the expected log-likelihood of the data conditional on latent variables so that it encourages the (variational) densities that place their mass on configurations of the
+latent variables that explain the observed data, i.e. increases the likelihood. The second term $ \mrm{KL}(q(\zz)||p(\zz))$ denotes that it encourages the density to be closer to prior in order to minimize divergence. 
+
+\subsection{Mean field methods}
+Mean field method is a way to restrict $q(\zz)$ to an "easier" family. We assume that $q$ distribution can be factorized as follows:
+\begin{equation}
+    q(\zz) = \prod_{i=1}^Mq_i(\zz_i)
+\end{equation}
+where $\zz$ is partitioned into disjoint groups $\zz_i$.   Then, we obtain coordinate ascent algorithm to optimize ELBO. 
+
 \section{Monte Carlo}
 \emph{MLAPP Chap.23,24; PRML Chap.11}
 \subsection{Monte Carlo Inference}
@@ -591,15 +657,106 @@ We say that a Markov chain $\mbf A$ is time reversible if there exists a distrib
 
 The basic idea in Metroplis-Hasting is that at each step, we propose to move from current state $\xx$ to a new state $\xx'$ with probability $q(\xx'|\xx)$ 
 
-
 \section{Sequential Data}
 \emph{MLAPP Chap.17,18; PRML Chap.13}
 
 \section{Gaussian Process}
 \emph{MLAPP Chap.15}
 
+Here we want to approximate a function $y= f(\xx)$ be a linear function in the form 
+\begin{equation}
+    y(\xx) = \ww\trans\phi(\xx)
+\end{equation}
+where $\phi(\xx)$ is a vector composed by $M$ fixed basis functions $\phi_j(\xx),\ j=1,2,\dots,M$. Then we assume the prior distribution over $\ww$:
+\begin{equation}
+    p(\ww) = \normD(\ww|\bmz, \alpha\rev\mbf I).
+\end{equation}
+Then given training data set $\{\xx_1, \dots, \xx_N\}$ with targets $\{t_1,\dots, t_N\}$ . We denote $\yy = (y_1,\dots, y_2)\trans,\ y_n=y(\xx_n).$, then 
+\begin{equation}
+    \yy =  \Phi\ww
+\end{equation}
+where $\phi$ is a matrix with elements $\Phi_{nk}=\phi_k(\xx_n)$. So we have $\Exp[\yy]=\bmz,\ \mrm{cov}[\yy\yy\trans] = \frac{1}{\alpha}\Phi\Phi\trans=\KK$, where $K_{nm}=k(\xx_n,\xx_m)=\frac{1}{\alpha}\phi\trans(\xx_n)\phi(\xx_m)$
+
+\subsection{Gaussian process for regression}
+For regression problem, we assume our sampling target points $t_n$ is obtained by adding a noise $\epsilon$ to the true target number $y_n$:
+\begin{equation}
+    t_n=y_n+\epsilon.
+\end{equation}
+So 
+\begin{gather}
+    p(t_n|y_n)=\normD(t_n|y_n, \beta\rev) \\
+    p(\ttt|\yy) = \normD(\ttt|\yy,\beta\rev\mbf I)
+\end{gather}
+Then we can obtain the marginal distribution of $\ttt$:
+\begin{equation}
+    p(\ttt) = \int p(\ttt|\yy)p(\yy)\ud\yy=\normD(\ttt|\bmz, \CC)
+\end{equation}
+where 
+\begin{equation}\label{eq13.1}
+    \CC_{nm}=k(\xx_n,\xx_m)+\beta\rev\delta_{nm}.
+\end{equation}
+Although we obtain this result via $k(\xx_n,\xx_m) = \frac1\alpha\phi\trans(\xx_n)\phi(\xx_m)$, now we can discard this to make our model more flexible. Usually we choose the \emph{kerel function} $k(\cdot,\cdot))$ as 
+\begin{equation}
+    k(\xx_n,\xx_m)=\theta_0\exp\{-\frac{\theta_1}{2}\|\xx_n-\xx_m\|^2\}+\theta_2+\theta_3\xx_n\trans\xx_m.
+\end{equation}
+
+Then we want to find the conditional distribution $p(t_{N+1}|\ttt)$. First,
+\begin{equation}
+    p(\ttt_{N+1}) = \normD(\ttt_{N+1}|\bmz, \CC_{N+1})
+\end{equation}
+where $\CC_{N+1}$ is defined by \ref{eq13.1} while $N$ is substituted with $N+1$, and we can partition it in the form
+\begin{equation}
+    \CC_{N+1}=\left(\begin{array}{cc}
+         \CC_N & \kk  \\
+         \kk\trans & c 
+    \end{array}\right)
+\end{equation}
+where $\CC_N$ is just defined by \ref{eq13.1}, $\kk$ has elements $k(\xx_n,\xx_{N+1})$ and the scalar $c = k(\xx_{N+1},\xx_{N+1})+\beta\rev$.
+Using knowledge in Gaussian probability, we can obtain the conditional distribution $p(t_{N+1}|\ttt_N)$ is still Gaussian with mean and variance given by 
+\begin{gather}\label{eq13.2}
+    \Exp[t_{N+1}] = m(\xx_{N+1})=\kk\trans\CC_N\ttt, \\
+    \mrm{var}[t_{N+1}] = \sigma^2(\xx_{N+1})=c-\kk\trans\CC_N\rev\kk,
+\end{gather}
+where these functions is relied on $\xx_{N+1}$ through $\kk$ because $\kk$ is defined by $k(\xx_n,\xx_{N+1}$.
+
+Note that the only restriction on the kernel function is that the covariance matrix given by  \ref{eq13.1} is positive definite. And if kernel matrix is positive semidefinite, the requirement will certainly be satisfied.  
+
+Note that the mean given by \ref{eq13.2} of the predictive distribution can be written, as a function of $\xx_{N+1}$, in the form
+\begin{equation}
+    m(\xx_{N+1})=\sum_{n=1}^Na_nk(\xx_n, \xx_{N+1})
+\end{equation}
+where $a_n$ is the $n^{\mrm{th}}$ component of $\CC_N\rev\ttt$. Thus, the kernel function depends only on the distance $\|\xx_n-\xx_m\|$, then we obtain an expansion in \emph{radial basis functions}.
+
+\subsection{Gaussian process for classification}
+Define a Gaussian process on $a(\xx)$ then transform it using a logistic sigmoid $y=\sigma(a)$, so we obtain a non-Gaussian stochastic process over $y(\xx)$ where $y\in\{0,1\}$. Then the probability distribution over the target variable $t$ is then given by the Bernoulli distribution 
+\begin{equation}
+    p(t|a)=\sigma(a)^t(1-\sigma(a))^{1-t}.
+\end{equation}
+
+As usual, we denote $\xx_1,\dots,\xx_N$, $\ttt$, then we consider a single test point $\xx_{N+1}$. Our goal is to determine the predictive distribution $p(t_{N+1}|\ttt)$, where we have left the conditioning on the input variables implicit. To do this we introduce a Gaussian process 
+prior over the vector $\mbf a_{N+1}$, which has components $a(\xx_1), \dots, a(\xx_{N+1})$. 
+\begin{equation}
+    p(\mbf a_{N+1}) = \normD(\mbf a_{N+1}|\bmz,\CC_{N+1}).
+\end{equation}
+Unlike the regression case, the covariance matrix no longer includes a noise term because we assume that all of the training data points are correctly labelled. However, for numerical reasons it is convenient to introduce a noise-like term governed by a parameter $\nu$ that ensures that the covariance matrix is positive definite. Thus 
+\begin{equation}
+    \CC(\xx_n,\xx_m) = k(\xx_n,\xx_m)+\nu\delta_{nm}
+\end{equation}
+where $k(\xx_n,\xx_m)$ is any positive semidefinite kernel function. And we assume the kernel function is governed by parameters $\bm{\theta}$. 
+
+For two-class problem, it is sufficient to predict $p(t_{N+1}=1|\ttt_N)$:
+\begin{equation}
+    p(t_{N+1}=1|\ttt_N) = \int p(t_{N+1}=1|a_{N+1})p(a_{N+1}|\ttt_N)\ud a_{N+1}
+\end{equation}
+where $p(t_{N+1}=1|a_{N+1})=\sigma(a_{N+1})$. The integral is analytically intractable so we want to use a Gaussian distribution to approximate the logistic function. There are generally three approaches:
+\begin{itemize}
+    \item \emph{variational inference}. make use of the local variational bound on the logistic sigmoid. 
+    \item \emph{expectation propagation}.
+    \item Laplace approximation. 
+\end{itemize}
+
 \section{Neural Network}
-\emph{MLAPP Chap.16, PRML CHap.5}
+\emph{MLAPP Chap.16, PRML Chap.5}
 In this section, our focus is on neural networks as efficient models for statistical pattern recognition.
 \subsection{Feed-forward Network Functions}
 The linear models for regression and classification, respectively, are based on linear combinations of fixed nonlinear basis functions $\phi_j(\mathrm x)$ and take the form
@@ -746,6 +903,8 @@ More details can be found in section5.5 in \tit{PRML}.
 
 \section{Deep Learning}
 \emph{MLAPP Chap.28}
+Given a data set $\mcal D = \{\xx_1,\dots, \xx_N\} \sim p(\xx)$, we want  to find the distribution $p(\xx)$. 
+
 
 \section{Combining Models}
 \emph{PRML Chap.14}
